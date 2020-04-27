@@ -1,2 +1,2 @@
 # MyMLCodes
-implementations of ML algorithms that I have learnt
+implementations of ML algorithms from scratch in python 
