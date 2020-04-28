@@ -7,11 +7,11 @@ class BackPropagation:
         self.target = target
         self.act = activation_function
         self.lr = learning_rate
+        self.grad=[]
 
     def calculate_grad(self):
         output_error = (self.target-self.input[-1])[0]
         local_grads = []
-        grad = []
         L = len(self.input)
         for i in range(1,L):      #number of layers
             grads = np.zeros(self.W[L-i-1].shape)
@@ -30,4 +30,13 @@ class BackPropagation:
                 for k in range(self.W[L-i-1].shape[1]):
                     grads[j][k] = self.lr*local_grad*self.input[L-i-1][0][k]
             local_grads.append(local)
-            grad.append(grads)
+            self.grad.append(grads)
+            return grad
+
+    def update_weights(self):
+        L=len(self.input)
+        for i in range(1,L):
+            grads = self.grad[i-1]
+            for j in range(self.W[L-i-1].shape[0]):
+                for k in range(self.W[L-i-1].shape[1]):
+                    self.W[L-i-1][j][k]+=grads[j][k]
