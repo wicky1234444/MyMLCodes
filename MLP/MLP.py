@@ -9,7 +9,7 @@ class MLP:      ##multi layer perceptron
         self.lr = lr
         self.act = activation_function      ##sigmoid is used for now
 
-    def FeedForward(self, input):           ##feed the input forward into the network and calculate layer wise outputs
+    def Forward(self, input):           ##feed the input forward into the network and calculate layer wise outputs
         L = len(self.W)
         layer_wise_outputs = []
         layer_wise_outputs.append(input)
