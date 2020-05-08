@@ -66,6 +66,13 @@ class convolution_layer:
             pool_output.append(img)
         return pool_output
 
-        
+class dense_layer:
+    def __init__(self, layer_dim, activation_function='softmax'):
+        self.W = np.random.randn(layer_dim[0], layer_dim[1])
+        self.activation = activation_function      
 
+    def forward(self, input):
+        out = np.dot(self.W, input)
+        out = np.exp(out)/sum(np.exp(out))
+        return out
 
