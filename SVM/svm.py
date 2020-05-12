@@ -1,21 +1,24 @@
 import numpy as np
 import numpy
+import copy
 from cvxopt import matrix as cvxopt_matrix
 from cvxopt import solvers as cvxopt_solvers
 ##solving SVM as a convex optimization problem
 
 class SVM:
-    def __init__(self):
+    def __init__(self, kernel, kernel_parameters=1):
         self.lagrangian_multipliers = []
+        self.support_vectors = []
+        self.sv_classes = []
+        self.kernel = kernel
+        self.param = kernel_parameters
 
-    def convex_optimization(self, X, Y, C=1, kernel = 'None', p):
+    def convex_optimization(self, X, Y, C=1, alpha_threshold = 1e-7):
         m,n = X.shape
+        X1= copy.deepcopy(X)
         for i in range(Y.shape[0]):
             X[i] = X[i]*Y[i]
-        H = np.dot(X,X.T)
-        if kernel=='polynomial':
-            H = H+1
-            H = np.power(H,p)
+        H = self.kernel_trick(X,X)
         Y = Y.reshape(1,-1).astype(float)
         
         P = cvxopt_matrix(H)
@@ -33,11 +36,30 @@ class SVM:
 
         sol = cvxopt_solvers.qp(P, q, G, h, A, b)
         alphas = np.array(sol['x'])
+
+        alphas = alphas.reshape(1,-1)[0]
+        alphas = np.where(alphas<alpha_threshold, 0, alphas)
+        alpha_ind = np.nonzero(alphas)[0]
+        self.lagrangian_multipliers = alphas[np.array(alpha_ind)]
+        self.support_vectors = X1[np.array(alpha_ind)]
+        self.sv_classes = Y[0][np.array(alpha_ind)]
         return alphas
     
-    def kernel_trick(kernel, x1, x2, p):
-        if kernel == 'poly':
-            return np.power(np.dot(x1,x2.T)+1,p)
-        elif kernel == 'gaussian':
-            return (1/(2*p))*np.exp(-np.power((x1-x2),2)/(2*p))
+    def kernel_trick(self,x1, x2):
+        if self.kernel == 'linear':
+            return np.dot(x1,x2.T)
+        elif self.kernel == 'poly':
+            return np.power(np.dot(x1,x2.T)+1,self.param)
+        elif self.kernel == 'gaussian':
+            return (1/(2*self.param))*np.exp(-np.power((x1-x2),2)/(2*self.param))
 
+    def predict(self, X):
+        predictions = []
+        for i in range(X.shape[0]):
+            p = self.lagrangian_multipliers*self.sv_classes*self.kernel_trick(self.support_vectors, X[i])
+            p = np.sum(p)
+            if p<0:
+                predictions.append(-1)
+            else:
+                predictions.append(1)
+        return np.asarray(predictions)
