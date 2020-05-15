@@ -57,8 +57,9 @@ def Gini_coefficient(true_labels, prediction_probabilities):
 def concordant_ratio(true_labels, prediction_probabilities):
     ## divide the true classes into +ve and -ve and calculate concordant and discordant pairs
     pos_prob = prediction_probabilities[:,1]
-    pos = np.where(true_labels==1)
-    neg = np.where(true_labels==-1)     ##or true_labels==0
+    pos = np.where(true_labels==1)[0]
+    true_labels = np.where(true_labels==0, -1, true_labels)
+    neg = np.where(true_labels==-1)[0]     ##or true_labels==0
     total_pairs = pos.shape[0]*neg.shape[0]
     concordant_pairs = 0
     discordant_pairs = 0
