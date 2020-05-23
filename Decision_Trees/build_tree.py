@@ -1,4 +1,4 @@
-from Decision_Trees.tree_splitting_criterion import Information_Gain, Entropy
+from tree_splitting_criterion import Information_Gain, Entropy
 import numpy as np
 import pandas as pd
 
@@ -24,7 +24,7 @@ class Decision_tree:
         split_val = -1
         split_col = ""
         for col in list(X.columns)[:-1]:
-            entropy, val = find_best_split(X, col, Y)
+            entropy, val = self.find_best_split(X, col, Y)
             if entropy==0:
                 return [entropy, val, col]
             elif(entropy<=min_entropy):
@@ -57,7 +57,11 @@ class Decision_tree:
     def predict(self, x, tree):
         if(len(tree.keys())==1):
             return tree['val']
-        elif(x[tree['col']]<tree['cutoff']):
+        elif(x[tree['col']]<tree['cutoff'] and tree['left']!=None):
             return self.predict(x, tree['left'])
-        else:
+        elif(x[tree['col']]<tree['cutoff'] and tree['left']==None):
+            return tree['val']
+        elif(x[tree['col']]>=tree['cutoff'] and tree['right']!=None):
             return self.predict(x, tree['right'])
+        elif(x[tree['col']]>=tree['cutoff'] and tree['right']==None):
+            return tree['val']
