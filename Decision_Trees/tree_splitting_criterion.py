@@ -39,5 +39,7 @@ def Gini_index(class1, class2):
         gini+= p3*prob[i]
     return gini
 
+def Variance_reduction():
+
 
 

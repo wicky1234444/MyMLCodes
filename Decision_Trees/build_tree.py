@@ -1,37 +1,59 @@
-from tree_splitting_criterion import Information_Gain, Entropy
+from tree_splitting_criterion import Information_Gain, Entropy, Gini_index
 import numpy as np
 import pandas as pd
 
 class Decision_tree:
-    def __init__(self, max_depth=10):
+    def __init__(self, max_depth=10, split_criterion = 'Entropy'):
         self.max_depth = max_depth
         self.tree = {}
+        self.criterion = split_criterion
 
     def find_best_split(self, X, col, Y):
-        min_entropy = 10
+        if self.criterion == 'Entropy' or self.criterion == 'Gini':
+            criterion_val = 10
+        elif self.criterion == 'IG':
+            criterion_val = -1
         split_val = -1
         for val in set(X[col]):
             #print(val)
             y_pred = X[col]<val
-            entropy = Entropy(Y.to_numpy(), y_pred.to_numpy())
-            if(entropy<=min_entropy):
-                min_entropy=entropy
-                split_val = val
-        return [min_entropy, split_val]
+            if self.criterion == 'Entropy' or self.criterion == 'Gini':
+                entropy = Entropy(Y.to_numpy(), y_pred.to_numpy())
+                if(entropy<=criterion_val):
+                    criterion_val=entropy
+                    split_val = val
+            elif self.criterion == 'IG':
+                ig = Information_Gain(Y.to_numpy(), y_pred.to_numpy())
+                if(ig>=criterion_val):
+                    criterion_val = ig
+                    split_val = val
+        return [criterion_val, split_val]
 
     def best_column_to_split(self, X, Y):
-        min_entropy = 10
+        if self.criterion == 'Entropy' or self.criterion == 'Gini':
+            criterion_val = 10
+        elif self.criterion == 'IG':
+            criterion_val = -1
         split_val = -1
         split_col = ""
         for col in list(X.columns)[:-1]:
-            entropy, val = self.find_best_split(X, col, Y)
-            if entropy==0:
-                return [entropy, val, col]
-            elif(entropy<=min_entropy):
-                min_entropy = entropy
-                split_val = val
-                split_col = col
-        return [min_entropy, split_val, split_col]
+            if self.criterion == 'Entropy' or self.criterion == 'Gini':
+                entropy, val = self.find_best_split(X, col, Y)
+                if entropy==0:
+                    return [entropy, val, col]
+                elif(entropy<=criterion_val):
+                    criterion_val = entropy
+                    split_val = val
+                    split_col = col
+            elif self.criterion == 'IG':
+                ig, val = self.find_best_split(X, col, Y)
+                if ig==1:
+                    return [ig, val, col]
+                elif(ig>=criterion_val):
+                    criterion_val = ig
+                    split_val = val
+                    split_col = col
+        return [criterion_val, split_val, split_col]
 
     def build_tree(self, X, Y, depth, node = {}):
         if node==None:
