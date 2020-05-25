@@ -1,4 +1,4 @@
-from tree_splitting_criterion import Information_Gain, Entropy, Gini_index
+from tree_splitting_criterion import *
 import numpy as np
 import pandas as pd
 
@@ -11,7 +11,7 @@ class Decision_tree:
     def find_best_split(self, X, col, Y):
         if self.criterion == 'Entropy' or self.criterion == 'Gini':
             criterion_val = 10
-        elif self.criterion == 'IG':
+        elif self.criterion == 'IG' or self.criterion=='Chi':
             criterion_val = -1
         split_val = -1
         for val in set(X[col]):
@@ -22,7 +22,7 @@ class Decision_tree:
                 if(entropy<=criterion_val):
                     criterion_val=entropy
                     split_val = val
-            elif self.criterion == 'IG':
+            elif self.criterion == 'IG' or self.criterion=='Chi':
                 ig = Information_Gain(Y.to_numpy(), y_pred.to_numpy())
                 if(ig>=criterion_val):
                     criterion_val = ig
@@ -32,7 +32,7 @@ class Decision_tree:
     def best_column_to_split(self, X, Y):
         if self.criterion == 'Entropy' or self.criterion == 'Gini':
             criterion_val = 10
-        elif self.criterion == 'IG':
+        elif self.criterion == 'IG' or self.criterion=='Chi':
             criterion_val = -1
         split_val = -1
         split_col = ""
@@ -45,7 +45,7 @@ class Decision_tree:
                     criterion_val = entropy
                     split_val = val
                     split_col = col
-            elif self.criterion == 'IG':
+            elif self.criterion == 'IG' or self.criterion=='Chi':
                 ig, val = self.find_best_split(X, col, Y)
                 if ig==1:
                     return [ig, val, col]

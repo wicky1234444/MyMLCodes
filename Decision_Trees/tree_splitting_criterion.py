@@ -39,7 +39,20 @@ def Gini_index(class1, class2):
         gini+= p3*prob[i]
     return gini
 
-def Variance_reduction():
+def Chi_square(class1, class2):
+    class_values = np.unique(class2, return_counts=True)
+    classes = np.unique(class1, return_counts=True)
+    expected = classes[1]/np.sum(classes[1])
+    chaid = 0
+    for i in range(len(class_values[0])):  ##for each class
+        ind = np.where(class2==class_values[0][i])[0]
+        p1 = np.unique(class1[ind], return_counts=True)
+        p2 = np.power(np.divide(np.power((p1[1]-expected*np.sum(p1[1])),2),expected*np.sum(p1[1])), 0.5)
+        #print(p1, p2)
+        chaid +=np.sum(p2)
+    return chaid
+
+#def Variance_reduction():
 
 
 
