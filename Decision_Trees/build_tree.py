@@ -1,4 +1,6 @@
-from tree_splitting_criterion import *
+import sys
+sys.path.append('../')
+from Decision_Trees.tree_splitting_criterion import *
 import numpy as np
 import pandas as pd
 
