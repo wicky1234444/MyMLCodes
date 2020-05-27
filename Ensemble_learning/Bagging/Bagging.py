@@ -1,5 +1,7 @@
+## Generalized bagging algorithm
+
 import sys
-sys.path.append('../')
+sys.path.append('../../')
 import numpy as np
 import pandas as pd
 from Decision_Trees.build_tree import *
@@ -7,7 +9,7 @@ from MLP.MLP import *
 from Regression_models. regression import *
 from Regression_models.lasso_regression import *
 
-def Booststrap(X, subsets = 10):
+def Bootstrap(X, subsets = 10):
     ind = np.asarray([x for x in range(X.shape[0])])
     n_subsets = []
     for i in range(subsets):
@@ -17,7 +19,7 @@ def Booststrap(X, subsets = 10):
 def Bagging(algorithm = ['dt'], X=[], Y=[], subsets=10):
     bagged_alg = {}
     if len(algorithm)==1:
-        datasets = Booststrap(X, subsets)
+        datasets = Bootstrap(X, subsets)
         bagged_alg['type'] = 'homogenious'
         bagged_alg['algorithm'] = 'decision tree'
         bagged_alg['predictors'] = []

@@ -3,11 +3,13 @@ sys.path.append('../')
 from Decision_Trees.tree_splitting_criterion import *
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 class Decision_tree:
-    def __init__(self, max_depth=10, split_criterion = 'Entropy'):
+    def __init__(self, max_depth=10, split_criterion = 'Entropy', node_eval='mean'):
         self.max_depth = max_depth
         self.tree = {}
+        self.node_eval = node_eval
         self.criterion = split_criterion
 
     def find_best_split(self, X, col, Y):
@@ -70,22 +72,32 @@ class Decision_tree:
             entropy, cutoff, col = self.best_column_to_split(X, Y)
             y_left = Y[X[col]<cutoff]
             y_right = Y[X[col]>=cutoff]
-            node = {'col': col, 'cutoff':cutoff, 'val':np.mean(Y)}
+            if self.node_eval== 'mean':
+                node = {'col': col, 'cutoff':cutoff, 'val':np.mean(Y)}
+            elif self.node_eval == 'mode':
+                node = {'col': col, 'cutoff':cutoff, 'val':stats.mode(Y)[0][0]}
             node['left'] = self.build_tree(X[X[col]<cutoff], y_left, depth+1, {})
             node['right'] = self.build_tree(X[X[col]>=cutoff], y_right, depth+1, {})
             return node
 
     def fit(self, X, Y):
-        self.tree = self.build_tree(X,Y, 0, {})
+        self.tree['features'] = list(X.columns)
+        self.tree['root'] = self.build_tree(X,Y, 0, {})
 
-    def predict(self, x, tree):
+    def single_predict(self, x, tree):
         if(len(tree.keys())==1):
             return tree['val']
         elif(x[tree['col']]<tree['cutoff'] and tree['left']!=None):
-            return self.predict(x, tree['left'])
+            return self.single_predict(x, tree['left'])
         elif(x[tree['col']]<tree['cutoff'] and tree['left']==None):
             return tree['val']
         elif(x[tree['col']]>=tree['cutoff'] and tree['right']!=None):
-            return self.predict(x, tree['right'])
+            return self.single_predict(x, tree['right'])
         elif(x[tree['col']]>=tree['cutoff'] and tree['right']==None):
             return tree['val']
+
+    def predict(self, test, tree):
+        predictions = []
+        for i in test.index.to_numpy():
+            predictions.append(self.single_predict(test[tree['features']].loc[i], tree['root']))
+        return np.asarray(predictions)
