@@ -12,7 +12,7 @@ class Decision_tree:
         self.node_eval = node_eval
         self.criterion = split_criterion
 
-    def find_best_split(self, X, col, Y):
+    def find_best_split(self, X, col, Y, sample_weight=[]):
         if self.criterion == 'Entropy' or self.criterion == 'Gini':
             criterion_val = 10
         elif self.criterion == 'IG' or self.criterion=='Chi':
@@ -22,18 +22,18 @@ class Decision_tree:
             #print(val)
             y_pred = X[col]<val
             if self.criterion == 'Entropy' or self.criterion == 'Gini':
-                entropy = Entropy(Y.to_numpy(), y_pred.to_numpy())
+                entropy = Entropy(Y.to_numpy(), y_pred.to_numpy(), sample_weight)
                 if(entropy<=criterion_val):
                     criterion_val=entropy
                     split_val = val
             elif self.criterion == 'IG' or self.criterion=='Chi':
-                ig = Information_Gain(Y.to_numpy(), y_pred.to_numpy())
+                ig = Information_Gain(Y.to_numpy(), y_pred.to_numpy(), sample_weight)
                 if(ig>=criterion_val):
                     criterion_val = ig
                     split_val = val
         return [criterion_val, split_val]
 
-    def best_column_to_split(self, X, Y):
+    def best_column_to_split(self, X, Y, sample_weight=[]):
         if self.criterion == 'Entropy' or self.criterion == 'Gini':
             criterion_val = 10
         elif self.criterion == 'IG' or self.criterion=='Chi':
@@ -42,7 +42,7 @@ class Decision_tree:
         split_col = ""
         for col in list(X.columns)[:-1]:
             if self.criterion == 'Entropy' or self.criterion == 'Gini':
-                entropy, val = self.find_best_split(X, col, Y)
+                entropy, val = self.find_best_split(X, col, Y, sample_weight)
                 if entropy==0:
                     return [entropy, val, col]
                 elif(entropy<=criterion_val):
@@ -50,7 +50,7 @@ class Decision_tree:
                     split_val = val
                     split_col = col
             elif self.criterion == 'IG' or self.criterion=='Chi':
-                ig, val = self.find_best_split(X, col, Y)
+                ig, val = self.find_best_split(X, col, Y, sample_weight)
                 if ig==1:
                     return [ig, val, col]
                 elif(ig>=criterion_val):
@@ -59,7 +59,7 @@ class Decision_tree:
                     split_col = col
         return [criterion_val, split_val, split_col]
 
-    def build_tree(self, X, Y, depth, node = {}):
+    def build_tree(self, X, Y, depth, node = {}, sample_weight = []):
         if node==None:
             return None
         elif len(Y)==0:
@@ -69,7 +69,7 @@ class Decision_tree:
         elif depth>=self.max_depth:
             return None
         else:
-            entropy, cutoff, col = self.best_column_to_split(X, Y)
+            entropy, cutoff, col = self.best_column_to_split(X, Y, sample_weight)
             y_left = Y[X[col]<cutoff]
             y_right = Y[X[col]>=cutoff]
             if self.node_eval== 'mean':
@@ -80,9 +80,9 @@ class Decision_tree:
             node['right'] = self.build_tree(X[X[col]>=cutoff], y_right, depth+1, {})
             return node
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, sample_weight=[]):
         self.tree['features'] = list(X.columns)
-        self.tree['root'] = self.build_tree(X,Y, 0, {})
+        self.tree['root'] = self.build_tree(X,Y, 0, {}, sample_weight)
 
     def single_predict(self, x, tree):
         if(len(tree.keys())==1):
