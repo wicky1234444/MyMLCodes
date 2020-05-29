@@ -22,12 +22,12 @@ class Decision_tree:
             #print(val)
             y_pred = X[col]<val
             if self.criterion == 'Entropy' or self.criterion == 'Gini':
-                entropy = Entropy(Y.to_numpy(), y_pred.to_numpy(), sample_weight)
+                entropy = Entropy(Y.to_numpy(), y_pred.to_numpy(), sample_weight=sample_weight)
                 if(entropy<=criterion_val):
                     criterion_val=entropy
                     split_val = val
             elif self.criterion == 'IG' or self.criterion=='Chi':
-                ig = Information_Gain(Y.to_numpy(), y_pred.to_numpy(), sample_weight)
+                ig = Information_Gain(Y.to_numpy(), y_pred.to_numpy(), sample_weight=sample_weight)
                 if(ig>=criterion_val):
                     criterion_val = ig
                     split_val = val
@@ -42,7 +42,7 @@ class Decision_tree:
         split_col = ""
         for col in list(X.columns)[:-1]:
             if self.criterion == 'Entropy' or self.criterion == 'Gini':
-                entropy, val = self.find_best_split(X, col, Y, sample_weight)
+                entropy, val = self.find_best_split(X, col, Y, sample_weight=sample_weight)
                 if entropy==0:
                     return [entropy, val, col]
                 elif(entropy<=criterion_val):
@@ -50,7 +50,7 @@ class Decision_tree:
                     split_val = val
                     split_col = col
             elif self.criterion == 'IG' or self.criterion=='Chi':
-                ig, val = self.find_best_split(X, col, Y, sample_weight)
+                ig, val = self.find_best_split(X, col, Y, sample_weight=sample_weight)
                 if ig==1:
                     return [ig, val, col]
                 elif(ig>=criterion_val):
@@ -69,7 +69,7 @@ class Decision_tree:
         elif depth>=self.max_depth:
             return None
         else:
-            entropy, cutoff, col = self.best_column_to_split(X, Y, sample_weight)
+            entropy, cutoff, col = self.best_column_to_split(X, Y, sample_weight=sample_weight)
             y_left = Y[X[col]<cutoff]
             y_right = Y[X[col]>=cutoff]
             if self.node_eval== 'mean':
@@ -82,7 +82,7 @@ class Decision_tree:
 
     def fit(self, X, Y, sample_weight=[]):
         self.tree['features'] = list(X.columns)
-        self.tree['root'] = self.build_tree(X,Y, 0, {}, sample_weight)
+        self.tree['root'] = self.build_tree(X,Y, 0, {}, sample_weight=sample_weight)
 
     def single_predict(self, x, tree):
         if(len(tree.keys())==1):
