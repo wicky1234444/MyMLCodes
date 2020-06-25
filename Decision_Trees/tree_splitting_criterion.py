@@ -54,17 +54,19 @@ def Gini_index(class1, class2, sample_weight=[]):
         ind = np.where(class2==classes[i])[0]
         p1 = np.unique(class1[ind], return_counts=True)
         if len(sample_weight)==0:
-            p2 = p1[1]/np.sum(p1[1])
-            p3 = p2*(1-p2)
-            gini+= p3*prob[i]
+            tot = np.sum(p1[1])
+            p1 = p1[1]/tot
+            p1 = 1-np.sum(np.power(p1,2))
+            gini+=p1*(tot)/size
         else:
             p2 = 0
             total_weight1 = np.sum(sample_weight[ind])
             for j in range(len(p1[0])):
-                ind1 = np.where(class1[ind]==p1[0][j])[0]
+                ind1 = ind[class1[ind]==p1[0][j]]
                 p3 = np.sum(sample_weight[ind1])/total_weight1
-                p3 = p3*(1-p3)
-                p2+= (total_weight1/total_weight1)*p3
+                p3 = np.power(p3,2)
+                p2+=p3
+            p2 = (total_weight1/total_weight)*(1-p2)
             gini+=p2
     return gini
 
